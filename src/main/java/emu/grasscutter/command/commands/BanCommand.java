@@ -1,65 +1,117 @@
 package emu.grasscutter.command.commands;
 
-import java.util.List;
-
+import emu.grasscutter.Grasscutter;
 import emu.grasscutter.command.Command;
 import emu.grasscutter.command.CommandHandler;
+import emu.grasscutter.database.DatabaseHelper;
 import emu.grasscutter.game.Account;
 import emu.grasscutter.game.player.Player;
-import emu.grasscutter.server.game.GameSession;
+import emu.grasscutter.server.event.Event;
+import emu.grasscutter.server.event.player.PlayerJoinEvent;
+import emu.grasscutter.server.game.GameServer;
+import emu.grasscutter.utils.ConfigContainer;
 
-@Command(
-    label = "ban",
-    usage = "ban <@player> [time] [reason]",
-    description = "commands.ban.description",
-    permission = "server.ban",
-    targetRequirement = Command.TargetRequirement.PLAYER
-)
-public final class BanCommand implements CommandHandler {
+import java.util.List;
 
-    private boolean banAccount(Player targetPlayer, int time, String reason) {
-        Account account = targetPlayer.getAccount();
+@Command(label = "ban", usage = "ban <add/remove/list> <user/id> reason",targetRequirement = Command.TargetRequirement.NONE)
+public class BanCommand implements CommandHandler{
+    Account targetBanAccount;
+    List<Account> accountBanned;
 
-        if (account == null) {
+    @Override
+    public void execute(Player sender, Player targetPlayer, List<String> args) {
+        if (sender != null) {return;}
+        if (args.size() == 0) {
+            CommandHandler.sendMessage(null, "usage: ban <add/remove/list> reason");
+            return;
+        }
+        int targetUid;
+        String banAction = args.get(0);
+        if(banAction == null) {CommandHandler.sendMessage(null, "usage: ban <add/remove/list> reason"); return;}
+        switch (banAction) {
+            case "add":
+                try {
+                    targetUid = Integer.parseInt(args.get(1));
+                    targetBanAccount = DatabaseHelper.getAccountByPlayerId(targetUid);
+                    if (ArgumentBanChecker()) {
+                        Player player = Grasscutter.getGameServer().getPlayerByAccountId(targetBanAccount.getId());
+                        if (player != null) {
+                            player.getSession().close();
+                        }
+                        targetBanAccount.setBanned(true);
+                        CommandHandler.sendMessage(null, "Ban Player " + targetBanAccount.getUsername() + "  Success");
+                    } else {
+                        return;
+                    }
+                    break;
+                } catch (IndexOutOfBoundsException index) {
+                    CommandHandler.sendMessage(null, "ban add <ID>");
+                    return;
+                }
+            case "remove":
+                try {
+                    targetUid = Integer.parseInt(args.get(1));
+                    targetBanAccount = DatabaseHelper.getAccountByPlayerId(targetUid);
+                    if(ArgumentUnBanChecker()) {
+                        if (targetBanAccount.getBanned()) {
+                            targetBanAccount.setBanned(false);
+                            CommandHandler.sendMessage(null, "unban " + targetBanAccount.getUsername() + "  Success");
+                        } else {
+                            return;
+                        }
+                    }
+                    break;
+                }catch (IndexOutOfBoundsException index) {
+                    CommandHandler.sendMessage(null, "ban remove <ID>");
+                    return;
+                }
+            case "list":
+                    try {
+                        for (Account acc : DatabaseHelper.getAllAccount()) {
+                            if(acc.getBanned()) {
+                                CommandHandler.sendMessage(null, "All Data Player ID " + acc.getId() + " Ban Stats " + acc.getBanned());
+                                //accountBanned.add(acc);
+                            }
+                        }
+
+                        // useless
+                        /*int banList = accountBannedUserName.size() + 1;
+                        CommandHandler.sendMessage(null, "Player Got Ban " + banList + " Player");
+                        for (int i = 0; i < accountBannedUserName.size(); i++) {
+                            CommandHandler.sendMessage(null, "" + accountBannedUserName.get(i));
+                        } */
+                        return;
+                    } catch (NullPointerException e) {
+                        CommandHandler.sendMessage(null, "Player Banned Is Null");
+                        return;
+                    }
+        }
+        if(targetBanAccount != null) {targetBanAccount.save();}
+    }
+
+    boolean ArgumentBanChecker() {
+        if (targetBanAccount == null) {
+            CommandHandler.sendMessage(null, "Player Invalid in database");
             return false;
         }
 
-        account.setBanReason(reason);
-        account.setBanEndTime(time);
-        account.setBanStartTime((int) System.currentTimeMillis() / 1000);
-        account.setBanned(true);
-        account.save();
+        if(targetBanAccount.getBanned()) {
+            CommandHandler.sendMessage(null, "This Player Already Ban");
+            return false;
+        }
+        return true;
+    }
+    boolean ArgumentUnBanChecker() {
+        if (targetBanAccount == null) {
+            CommandHandler.sendMessage(null, "Player Invalid in database");
+            return false;
+        }
 
-        GameSession session = targetPlayer.getSession();
-        if (session != null) {
-            session.close();
+        if(!targetBanAccount.getBanned()) {
+            CommandHandler.sendMessage(null, "This Player Not Banned");
+            return false;
         }
         return true;
     }
 
-    @Override
-    public void execute(Player sender, Player targetPlayer, List<String> args) {
-        int time = 2051190000;
-        String reason = "Reason not specified.";
-
-        switch (args.size()) {
-            case 2:
-                reason = args.get(1);  // Fall-through
-            case 1:
-                try {
-                    time = Integer.parseInt(args.get(0));
-                } catch (NumberFormatException ignored) {
-                    CommandHandler.sendTranslatedMessage(sender, "commands.ban.invalid_time");
-                    return;
-                }  // Fall-through, unimportant
-            default:
-                break;
-        }
-
-        if (banAccount(targetPlayer, time, reason)) {
-            CommandHandler.sendTranslatedMessage(sender, "commands.ban.success");
-        } else {
-            CommandHandler.sendTranslatedMessage(sender, "commands.ban.failure");
-        }
-    }
 }
