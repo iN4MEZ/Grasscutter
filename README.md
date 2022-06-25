@@ -20,7 +20,7 @@ EN | [简中](README_zh-CN.md) | [繁中](README_zh-TW.md) | [FR](README_fr-FR.m
 
 ## Special features XD
 
-* Time Command Like Minecraft
+* Time Command Like Minecraft [Time set <int value /or day/night>]
 * |Need to improve
 Translate
 ExceptionNull or Index
@@ -29,6 +29,11 @@ EventUpdate [time freeze]
 PacketSendToPlayerUpdate
 PermissionReq
 Noob Coder|
+
+* BanManager [ban <add>/<remove>/<list>]
+* |Need to improve 
+* Translate 
+* BanTime|
 
 ## Quick setup guide
 
