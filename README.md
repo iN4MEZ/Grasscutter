@@ -30,7 +30,7 @@ PacketSendToPlayerUpdate
 PermissionReq
 Noob Coder|
 
-* BanManager [ban <add><remove><list>]
+* BanManager [ban add/remove/list]
 * |Need to improve Translate BanTime|
 
 ## Quick setup guide
