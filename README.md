@@ -28,7 +28,7 @@ Static variable
 EventUpdate [time freeze]
 PacketSendToPlayerUpdate
 PermissionReq
-Noob Code|
+Noob Coder|
 
 ## Quick setup guide
 
