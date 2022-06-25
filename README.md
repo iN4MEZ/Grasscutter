@@ -21,6 +21,14 @@ EN | [简中](README_zh-CN.md) | [繁中](README_zh-TW.md) | [FR](README_fr-FR.m
 ## Special features XD
 
 * Time Command Like Minecraft
+* |Need to improve
+Translate
+ExceptionNull or Index
+Static variable
+EventUpdate [time freeze]
+PacketSendToPlayerUpdate
+PermissionReq
+Noob Code|
 
 ## Quick setup guide
 
