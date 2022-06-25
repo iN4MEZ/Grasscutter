@@ -18,6 +18,10 @@ EN | [简中](README_zh-CN.md) | [繁中](README_zh-TW.md) | [FR](README_fr-FR.m
 * Spawning monsters via console
 * Inventory features (recieving items/characters, upgrading items/characters, etc)
 
+## Special features XD
+
+* Time Command Like Minecraft
+
 ## Quick setup guide
 
 **Note:** For support please join our [Discord](https://discord.gg/T5vZU6UyeG).
